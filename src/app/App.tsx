@@ -6,6 +6,7 @@ import WebsiteDemo from './components/WebsiteDemo';
 import MobileAppDemo from './components/MobileAppDemo';
 import DesktopAppDemo from './components/DesktopAppDemo';
 import APIDemo from './components/APIDemo';
+import QuoteDemo from './components/QuoteDemo';
 
 interface Service {
   id: string;
@@ -21,6 +22,50 @@ export default function App() {
   const [showContact, setShowContact] = useState(false);
   const [showComingSoon, setShowComingSoon] = useState(false);
   const [comingSoonPlatform, setComingSoonPlatform] = useState('');
+  const [currentLanguage, setCurrentLanguage] = useState(0);
+
+  const translations = [
+    {
+      title: "What Can I Build For You?",
+      subtitle: "Click a service to explore",
+      quote: "Get Quote",
+      services: {
+        website: "Website",
+        mobileapp: "Mobile App",
+        desktopapp: "Desktop App",
+        api: "API"
+      }
+    },
+    {
+      title: "ماذا يمكنني أن أبني لك؟",
+      subtitle: "انقر على خدمة للاستكشاف",
+      quote: "احصل على عرض سعر",
+      services: {
+        website: "موقع ويب",
+        mobileapp: "تطبيق جوال",
+        desktopapp: "تطبيق سطح مكتب",
+        api: "واجهة برمجة"
+      }
+    },
+    {
+      title: "Je vous construis quoi ?",
+      subtitle: "Cliquez sur un service pour explorer",
+      quote: "Obtenir un devis",
+      services: {
+        website: "Site Web",
+        mobileapp: "Application Mobile",
+        desktopapp: "Application de Bureau",
+        api: "API"
+      }
+    }
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentLanguage((prev) => (prev + 1) % translations.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     if (selectedService && hoveredService) {
@@ -96,6 +141,8 @@ export default function App() {
         return <DesktopAppDemo />;
       case 'api':
         return <APIDemo />;
+      case 'quote':
+        return <QuoteDemo />;
       default:
         return null;
     }
@@ -171,10 +218,10 @@ export default function App() {
             {services.map((service) => (
               <motion.button
                 key={service.id}
-                onMouseEnter={() => handleServiceHover(service.id)}
-                onMouseLeave={handleServiceLeave}
                 onClick={() => setSelectedService(service.id)}
-                className={`w-9 h-9 md:w-16 md:h-16 rounded-xl flex items-center justify-center cursor-pointer border-2 border-white/20 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50 transition-all ${selectedService === service.id ? 'opacity-100 scale-100' : 'opacity-60 scale-90 hover:opacity-80 hover:scale-95'}`}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className={`w-9 h-9 md:w-16 md:h-16 rounded-xl flex items-center justify-center cursor-pointer border-2 border-white/20 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50 transition-all ${selectedService === service.id ? 'opacity-100 scale-100' : 'opacity-60 scale-90'}`}
                 style={{
                   background: `linear-gradient(135deg, ${service.color}40, ${service.color}20)`,
                 }}
@@ -208,11 +255,33 @@ export default function App() {
             transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
             className="text-center mb-8 md:mb-16 px-4"
           >
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
-              What Can I Build For You?
+            <h1 className="text-4xl md:text-6xl font-bold text-white mb-4 min-h-[3.5rem] md:min-h-[5rem]">
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={currentLanguage}
+                  initial={{ opacity: 0, y: 20, rotateX: -90 }}
+                  animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                  exit={{ opacity: 0, y: -20, rotateX: 90 }}
+                  transition={{ duration: 0.5, ease: "easeInOut" }}
+                  className="inline-block"
+                >
+                  {translations[currentLanguage].title}
+                </motion.span>
+              </AnimatePresence>
             </h1>
-            <p className="text-lg md:text-xl text-purple-200">
-              Hover over a service to explore
+            <p className="text-lg md:text-xl text-purple-200 min-h-[1.75rem] md:min-h-[2.5rem]">
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={currentLanguage}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.5, ease: "easeInOut" }}
+                  className="inline-block"
+                >
+                  {translations[currentLanguage].subtitle}
+                </motion.span>
+              </AnimatePresence>
             </p>
           </motion.div>
 
@@ -228,8 +297,9 @@ export default function App() {
                   style={{ perspective: '1000px' }}
                 >
                   <motion.button
-                    onMouseEnter={() => handleServiceHover(service.id)}
-                    onMouseLeave={handleServiceLeave}
+                    onClick={() => setSelectedService(service.id)}
+                    whileHover={{ scale: 1.1, y: -10 }}
+                    whileTap={{ scale: 0.95 }}
                     className="relative w-20 h-20 sm:w-28 sm:h-28 md:w-48 md:h-48 rounded-2xl flex flex-col items-center justify-center gap-1 md:gap-4 cursor-pointer border-2 border-white/20 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-white/50"
                     style={{
                       background: `linear-gradient(135deg, ${service.color}40, ${service.color}20)`,
@@ -243,15 +313,6 @@ export default function App() {
                             transition: {
                               duration: 0.8,
                               ease: [0.4, 0, 0.2, 1],
-                            },
-                          }
-                        : hoveredService === service.id && !selectedService
-                        ? {
-                            scale: 1.2,
-                            y: -20,
-                            rotateY: [0, 5, 0],
-                            transition: {
-                              duration: 0.4,
                             },
                           }
                         : selectedService
@@ -268,44 +329,66 @@ export default function App() {
                   >
                     <motion.div
                       style={{ color: service.color }}
-                      animate={
-                        hoveredService === service.id
-                          ? {
-                              scale: [1, 1.1, 1],
-                              transition: {
-                                duration: 0.4,
-                              },
-                            }
-                          : {}
-                      }
                       className="md:hidden"
                     >
                       {React.cloneElement(service.icon as React.ReactElement, {})}
                     </motion.div>
                     <motion.div
                       style={{ color: service.color }}
-                      animate={
-                        hoveredService === service.id
-                          ? {
-                              scale: [1, 1.1, 1],
-                              transition: {
-                                duration: 0.4,
-                              },
-                            }
-                          : {}
-                      }
                       className="hidden md:block"
                     >
                       {React.cloneElement(service.icon as React.ReactElement, {})}
                     </motion.div>
                     <span className="text-white font-semibold text-xs sm:text-sm md:text-lg">
-                      {service.title}
+                      <AnimatePresence mode="wait">
+                        <motion.span
+                          key={`${currentLanguage}-${service.id}`}
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -5 }}
+                          transition={{ duration: 0.3, ease: "easeInOut" }}
+                          className="inline-block"
+                        >
+                          {translations[currentLanguage].services[service.id as 'website' | 'mobileapp' | 'desktopapp' | 'api']}
+                        </motion.span>
+                      </AnimatePresence>
                     </span>
                   </motion.button>
                 </motion.div>
               ))}
             </div>
           </section>
+
+          {/* Get Quote Button */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{
+              opacity: selectedService ? 0 : 1,
+              y: selectedService ? -20 : 0
+            }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+            className="mt-8"
+          >
+            <motion.button
+              onClick={() => setSelectedService('quote')}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="min-w-[140px] md:min-w-[180px] px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-full border-2 border-white/20 backdrop-blur-sm hover:from-purple-500 hover:to-pink-500 transition-all shadow-lg shadow-purple-500/30"
+            >
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={currentLanguage}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                  className="inline-block"
+                >
+                  {translations[currentLanguage].quote}
+                </motion.span>
+              </AnimatePresence>
+            </motion.button>
+          </motion.div>
 
           <motion.div
             initial={{ opacity: 0 }}
@@ -315,7 +398,6 @@ export default function App() {
             transition={{ delay: 0.6, ease: [0.4, 0, 0.2, 1] }}
             className="mt-6 md:mt-16 text-center text-purple-300 px-4"
           >
-            <p className="text-xs md:text-sm mb-3 md:mb-4">Full-Stack Web Developer | React • TypeScript • 3D Animations</p>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -333,15 +415,18 @@ export default function App() {
               >
                 <Github size={16} className="text-white md:size-20" />
               </motion.a>
-              <motion.button
-                onClick={() => { setComingSoonPlatform('Facebook'); setShowComingSoon(true); }}
+              <motion.a
+                href="https://facebook.com/DevZoneDz/"
+                //onClick={() => { setComingSoonPlatform('Facebook'); setShowComingSoon(true); }}
+                target="_blank"
+                rel="noopener noreferrer"
                 whileHover={{ scale: 1.2, rotate: 5 }}
                 whileTap={{ scale: 0.9 }}
                 className="p-2 md:p-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-full hover:bg-white/20 transition-colors"
                 aria-label="Facebook Profile"
               >
                 <Facebook size={16} className="text-white md:size-20" />
-              </motion.button>
+              </motion.a>
               <motion.button
                 onClick={() => { setComingSoonPlatform('Instagram'); setShowComingSoon(true); }}
                 whileHover={{ scale: 1.2, rotate: 5 }}
